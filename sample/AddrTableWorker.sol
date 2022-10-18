@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.25;
 
 import "./Table.sol";
 
@@ -7,7 +7,7 @@ contract AddrTableWorker {
     event permissionEvent(int256 ret, address sender,address orgin,string memo);
     event createEvent(int256 ret, string name, uint256 balance,address city,string memo);
    // event transferEvent(int256 ret, string from, string to, uint256 amount,string memo);
-	
+
 	string tableName;
         constructor() public {
         // 构造函数中创建t_asset表
@@ -16,18 +16,18 @@ contract AddrTableWorker {
     }
 
     function createTable() private {
-        TableFactory tf = TableFactory(0x1001); 
+        TableFactory tf = TableFactory(0x1001);
 		//表字段列： name，balance ,city
         tf.createTable(tableName, "name", "balance,city");
 
     }
 
     function openTable() private returns(Table) {
-	    TableFactory tf = TableFactory(0x1001); 
+	    TableFactory tf = TableFactory(0x1001);
         Table  table = tf.openTable(tableName);
         return table;
     }
-    
+
     function select(string name) public constant returns(int256,uint256,address) {
         // 打开表
         Table table  = openTable();
@@ -41,7 +41,7 @@ contract AddrTableWorker {
             return (999, uint256(entry.getInt("balance")),addr );
         }
     }
-	
+
 	function is_exist(string name) public constant returns(int256 )
 	{
 	     Table table =   openTable();
@@ -54,13 +54,13 @@ contract AddrTableWorker {
             return (1);
         }
 	}
-    
+
     function create(string name, uint256 balance,address city) public returns(int256){
         int256 ret_code = 0;
         int256 ret= 0;
         uint256 temp_balance = 0;
-		
-        Table table = openTable();		
+
+        Table table = openTable();
         // 查询账号是否存在
         ret = is_exist(name);
         if(ret != 0) {
@@ -68,7 +68,7 @@ contract AddrTableWorker {
 	      emit createEvent(ret_code, name,0,0x0,"name exists ,can't create again");
 	 	   return ret_code;
    	    }
-		
+
         Entry entry = table.newEntry();
         entry.set("name", name);
         entry.set("balance", int256(balance));
@@ -85,18 +85,17 @@ contract AddrTableWorker {
     }
     function dectectAddr() public returns(int256)
     {
-	 
+
 	 require(msg.sender == tx.origin);
-         if(msg.sender != address(0x156dff526b422b17c4f576e6c0b243179eaa8407) )   
+         if(msg.sender != address(0x156dff526b422b17c4f576e6c0b243179eaa8407) )
 	 {
 		emit permissionEvent(-1, msg.sender, tx.origin,"not the address 0x156dff526b422b17c4f576e6c0b243179eaa8407");
 		return -1;
          }else{
-            
+
                  emit permissionEvent(0, msg.sender, tx.origin,"match the address 0x156dff526b422b17c4f576e6c0b243179eaa8407");
 		return 0;
          }
     }
 
 }
-
